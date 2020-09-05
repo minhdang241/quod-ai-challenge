@@ -1,11 +1,13 @@
 package Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Issue {
     private String openDate;
     private String closeDate;

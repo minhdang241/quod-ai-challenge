@@ -5,12 +5,22 @@ public class RepoStat {
     private int numberOfCommits;
     private int avgCommitsPerDay;
     private long avgTimeIssueRemainOpened;
+    private long avgTimeToMergePR;
 
-    public RepoStat(String repoName, int numberOfCommits, int avgCommitsPerDay, long avgTimeIssueRemainOpened) {
+    public RepoStat(String repoName, int numberOfCommits, int avgCommitsPerDay, long avgTimeIssueRemainOpened, long avgTimeToMergePR) {
         this.repoName = repoName;
         this.numberOfCommits = numberOfCommits;
         this.avgCommitsPerDay = avgCommitsPerDay;
         this.avgTimeIssueRemainOpened = avgTimeIssueRemainOpened;
+        this.avgTimeToMergePR = avgTimeToMergePR;
+    }
+
+    public long getAvgTimeToMergePR() {
+        return avgTimeToMergePR;
+    }
+
+    public void setAvgTimeToMergePR(long avgTimeToMergePR) {
+        this.avgTimeToMergePR = avgTimeToMergePR;
     }
 
     public int getAvgCommitsPerDay() {

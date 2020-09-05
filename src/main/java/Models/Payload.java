@@ -5,6 +5,8 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Payload {
+    private PullRequest pullRequest;
+
     private List<Commit> commits;
 
     private Issue issue;
@@ -23,6 +25,14 @@ public class Payload {
 
     public void setIssue(Issue issue) {
         this.issue = issue;
+    }
+
+    public PullRequest getPullRequest() {
+        return pullRequest;
+    }
+
+    public void setPullRequest(PullRequest pullRequest) {
+        this.pullRequest = pullRequest;
     }
 
     @Override
