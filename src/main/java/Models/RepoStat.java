@@ -6,13 +6,16 @@ public class RepoStat {
     private int avgCommitsPerDay;
     private long avgTimeIssueRemainOpened;
     private long avgTimeToMergePR;
+    private int avgCommitPerDeveloper;
+    private float health;
 
-    public RepoStat(String repoName, int numberOfCommits, int avgCommitsPerDay, long avgTimeIssueRemainOpened, long avgTimeToMergePR) {
+    public RepoStat(String repoName, int numberOfCommits, int avgCommitsPerDay, long avgTimeIssueRemainOpened, long avgTimeToMergePR, int avgCommitPerDeveloper) {
         this.repoName = repoName;
         this.numberOfCommits = numberOfCommits;
         this.avgCommitsPerDay = avgCommitsPerDay;
         this.avgTimeIssueRemainOpened = avgTimeIssueRemainOpened;
         this.avgTimeToMergePR = avgTimeToMergePR;
+        this.avgCommitPerDeveloper = avgCommitPerDeveloper;
     }
 
     public long getAvgTimeToMergePR() {
@@ -59,14 +62,32 @@ public class RepoStat {
         this.numberOfCommits = numberOfCommits;
     }
 
+    public int getAvgCommitPerDeveloper() {
+        return avgCommitPerDeveloper;
+    }
 
+    public void setAvgCommitPerDeveloper(int avgCommitPerDeveloper) {
+        this.avgCommitPerDeveloper = avgCommitPerDeveloper;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+    }
 
     @Override
     public String toString() {
         return "RepoStat{" +
                 "repoName='" + repoName + '\'' +
                 ", numberOfCommits=" + numberOfCommits +
+                ", avgCommitsPerDay=" + avgCommitsPerDay +
+                ", avgTimeIssueRemainOpened=" + avgTimeIssueRemainOpened +
+                ", avgTimeToMergePR=" + avgTimeToMergePR +
+                ", avgCommitPerDeveloper=" + avgCommitPerDeveloper +
+                ", health=" + health +
                 '}';
     }
-
 }

@@ -4,13 +4,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Commit {
-    private String sha;
+    private Author author;
 
-    public String getSha() {
-        return sha;
+    public Author getAuthor() {
+        return author;
     }
 
-    public void setSha(String sha) {
-        this.sha = sha;
+    public void setAuthor(Author author) {
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        return "Commit{" +
+                "author=" + author +
+                '}';
     }
 }

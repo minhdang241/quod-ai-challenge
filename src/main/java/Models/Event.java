@@ -1,4 +1,4 @@
-package Models.Events;
+package Models;
 import Models.Payload;
 import Models.Repo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
