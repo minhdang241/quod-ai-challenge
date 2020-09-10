@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-public class Utils {
+public class GeneralUtils {
 
     public static LocalDateTime convertIS8061DateTime(String datetime) {
         DateTimeFormatter ISO8601Formatter = new DateTimeFormatterBuilder()
@@ -27,11 +27,11 @@ public class Utils {
         return LocalDateTime.parse(datetime, ISO8601Formatter);
     }
 
-    public static void downloadWithApacheCommons(String url, String localFilename) {
+    public static void downloadFileFromURL(String url, String localFilename) {
         int CONNECT_TIMEOUT = 10000;
         int READ_TIMEOUT = 10000;
         try {
-            FileUtils.copyURLToFile(new URL(url), new File(localFilename), CONNECT_TIMEOUT, READ_TIMEOUT);
+            org.apache.commons.io.FileUtils.copyURLToFile(new URL(url), new File(localFilename), CONNECT_TIMEOUT, READ_TIMEOUT);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -2,3 +2,4 @@
 .DS_Store
 target/
 *.csv
+error_file.txt

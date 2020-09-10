@@ -1,10 +1,8 @@
 package ai.quod.challenge.Helpers;
 
-import ai.quod.challenge.Main;
 import ai.quod.challenge.Models.Event;
 import ai.quod.challenge.Models.RepoStat;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -24,7 +22,10 @@ import java.util.logging.Logger;
 
 public class DataProcessUtils {
     private static final Logger LOGGER = Logger.getLogger(DataProcessUtils.class.getName());
-    public static float normalizeValue(float minValue, float maxValue, float currentValue, boolean isTime) {
+
+    public static float normalizeValue(List<Float> minMaxValue, float currentValue, boolean isTime) {
+        float maxValue = minMaxValue.get(0);
+        float minValue = minMaxValue.get(1);
         if (minValue == 0  && maxValue == 0) return 0;
         float newValue = (currentValue - minValue) / (maxValue - minValue);
         if (isTime) return 1 - newValue;
@@ -32,12 +33,12 @@ public class DataProcessUtils {
     }
 
 
-    public static float[] setMinMaxValue(float[] currentMinMaxValue, float value) {
-        if (value >  currentMinMaxValue[0]) {
-            currentMinMaxValue[0] = value;
+    public static List<Float> updateMinMaxValue(List<Float> currentMinMaxValue, float value) {
+        if (value >  currentMinMaxValue.get(0)) {
+            currentMinMaxValue.set(0, value);
         }
-        if (value < currentMinMaxValue[1]) {
-            currentMinMaxValue[1] = value;
+        if (value < currentMinMaxValue.get(1)) {
+            currentMinMaxValue.set(1, value);
         }
         return currentMinMaxValue;
     }
@@ -84,8 +85,6 @@ public class DataProcessUtils {
                     } catch (IOException err) {
                         LOGGER.log(Level.WARNING, "Cannot write to error_file.txt");
                     }
-
-
                 }
 
             }
@@ -105,11 +104,12 @@ public class DataProcessUtils {
         }
     }
 
-    public static long calculateDuration(String startTime, String endTime) {
+
+    public static int calculateDuration(String startTime, String endTime) {
         LocalDate start = LocalDate.parse(startTime, DateTimeFormatter.ISO_INSTANT);
         LocalDate end =LocalDate.parse(endTime, DateTimeFormatter.ISO_INSTANT);
         Duration duration = Duration.between(end, start);
-        return Math.abs(duration.toHours());
+        return (int) Math.abs(duration.toHours());
     }
 
 
@@ -123,15 +123,14 @@ public class DataProcessUtils {
                     .withHeader(headers))) {
                 writeRecord(data, printer);
             }
-
         } else {
             fw = new FileWriter(file, true);
             try (CSVPrinter printer = new CSVPrinter(fw, CSVFormat.DEFAULT)) {
                 writeRecord(data, printer);
-
             }
         }
     }
+
 
     private static void writeRecord(RepoStat data, CSVPrinter printer) throws IOException {
         List<String> Row = new ArrayList<>(Arrays.asList(data.getRepoName(), String.valueOf(data.getHealth()), String.valueOf(data.getNumberOfCommits()),

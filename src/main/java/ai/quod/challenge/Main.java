@@ -13,21 +13,18 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static ai.quod.challenge.Helpers.DataProcessUtils.*;
-import static ai.quod.challenge.Helpers.Utils.*;
-
+import static ai.quod.challenge.Helpers.GeneralUtils.*;
 
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-
-
         /*
+            THE MAIN FUNCTION FLOW THE STEPS BELOW:
             Step 1: Get datetime from arguments, then generate download url for each hour based on that
             Step 2: Parsing the downloaded files line by line -> convert to event objects -> store those objects in the Map along with the repo Id
-            Step 3: Calculate metrics using those events object -> calculate health of each repo -> write it to health_scores.txt
+            Step 3: Calculate metrics using those events object -> normalize them -> calculate health of each repo -> write them to health_scores.txt
         **/
-
 
         int numberOfDay = 1; // use this number to calculate the average commit per day
 
@@ -68,9 +65,9 @@ public class Main {
         //STEP 2: Parsing the downloaded files line by line -> convert to event objects -> store those objects in the Map along with the repo Id
         // Create a hash map to store events in each file
         Map<String, List<Event>> eventsByRepo  = new HashMap<>();
-
+        // Loop through each url -> download the file -> extract the information -> delete files to save storage
         for (String url: urls) {
-            downloadWithApacheCommons(url, "data.json.gz");
+            downloadFileFromURL(url, "data.json.gz");
             Path source = Paths.get("data.json.gz");
             Path target = Paths.get("data.json");
 
@@ -93,16 +90,12 @@ public class Main {
             }
         }
 
-        // STEP 3: Calculate metrics using those events object -> calculate health of each repo -> write it to health_scores.txt
-        // Variable to keep track mean max of metric for min-max normalization
-        float maxAvgCommitsPerDay = 0;
-        float maxAvgTimeIssueRemainOpen = 0;
-        float maxAvgTimeToMergePR = 0;
-        float maxAvgCommitsPerDeveloper = 0;
-        float minAvgCommitsPerDay = Float.MAX_VALUE;
-        float minAvgTimeIssueRemainOpen = Float.MAX_VALUE;
-        float minAvgTimeToMergePR = Float.MAX_VALUE;
-        float minAvgCommitsPerDeveloper = Float.MAX_VALUE;
+        // STEP 3: Calculate metrics using those events object -> normalize them -> calculate health of each repo -> write them to health_scores.txt
+        Map<String, List<Float>> minMaxValue = new HashMap<>();
+        minMaxValue.put("avgCommitsPerDay", new ArrayList<>(Arrays.asList((float) 0, Float.MAX_VALUE)));
+        minMaxValue.put("avgTimeIssueRemainOpen", new ArrayList<>(Arrays.asList((float) 0, Float.MAX_VALUE)));
+        minMaxValue.put("avgTimeToMergePR", new ArrayList<>(Arrays.asList((float) 0, Float.MAX_VALUE)));
+        minMaxValue.put("avgCommitsPerDeveloper", new ArrayList<>(Arrays.asList((float) 0, Float.MAX_VALUE)));
         List<RepoStat> listOfRepoStat = new ArrayList<>();
 
         // Loop through all the Events of each repo, and calculate the metric
@@ -158,44 +151,48 @@ public class Main {
                 avgCommitsPerDeveloper = numberOfCommits / setOfDevelopers.size();
             }
 
-            float[] minMaxValues = setMinMaxValue(new float[]{maxAvgCommitsPerDay, minAvgCommitsPerDay}, avgCommitsPerDay);
-            maxAvgCommitsPerDay = minMaxValues[0];
-            minAvgCommitsPerDay = minMaxValues[1];
-
-            minMaxValues = setMinMaxValue(new float[]{maxAvgTimeIssueRemainOpen, minAvgTimeIssueRemainOpen}, avgTimeIssueRemainOpen);
-            maxAvgTimeIssueRemainOpen = minMaxValues[0];
-            minAvgTimeIssueRemainOpen = minMaxValues[1];
-
-            minMaxValues = setMinMaxValue(new float[]{maxAvgTimeToMergePR, minAvgTimeToMergePR}, avgTimeToMergePR);
-            maxAvgTimeToMergePR = minMaxValues[0];
-            minAvgTimeToMergePR = minMaxValues[1];
-
-            minMaxValues = setMinMaxValue(new float[]{maxAvgCommitsPerDeveloper, minAvgCommitsPerDeveloper}, avgCommitsPerDeveloper);
-            maxAvgCommitsPerDeveloper = minMaxValues[0];
-            minAvgCommitsPerDeveloper = minMaxValues[1];
+            for (Map.Entry<String, List<Float>> element : minMaxValue.entrySet()) {
+                List<Float> newMinMaxValue = updateMinMaxValue(element.getValue(), avgCommitsPerDay);
+                element.setValue(newMinMaxValue);
+            }
 
             RepoStat repoStat = new RepoStat(repoName, numberOfCommits, avgCommitsPerDay, avgTimeIssueRemainOpen, avgTimeToMergePR, avgCommitsPerDeveloper);
 
             listOfRepoStat.add(repoStat);
         }
-        // Normalize and calculate health
-        for (RepoStat repoStat: listOfRepoStat) {
-            repoStat.setAvgCommitsPerDay(normalizeValue(minAvgCommitsPerDay, maxAvgCommitsPerDay, repoStat.getAvgCommitsPerDay(), false));
-            repoStat.setAvgTimeIssueRemainOpened(normalizeValue(minAvgTimeIssueRemainOpen, maxAvgTimeIssueRemainOpen, repoStat.getAvgTimeIssueRemainOpened(), true));
-            repoStat.setAvgCommitPerDeveloper(normalizeValue(minAvgCommitsPerDeveloper, maxAvgCommitsPerDeveloper, repoStat.getAvgCommitPerDeveloper(), false));
-            repoStat.setAvgTimeToMergePR(normalizeValue(minAvgTimeToMergePR, maxAvgTimeToMergePR, repoStat.getAvgTimeToMergePR(), true));
 
+
+        // Normalize and calculate health
+        List<Float> minMaxHealthValue = new ArrayList<>(Arrays.asList((float) 0, Float.MAX_VALUE));
+        for (RepoStat repoStat: listOfRepoStat) {
+            repoStat.setAvgCommitsPerDay(normalizeValue(minMaxValue.get("avgCommitsPerDay"), repoStat.getAvgCommitsPerDay(), false));
+            repoStat.setAvgTimeIssueRemainOpened(normalizeValue(minMaxValue.get("avgTimeIssueRemainOpen"), repoStat.getAvgTimeIssueRemainOpened(), true));
+            repoStat.setAvgTimeToMergePR(normalizeValue(minMaxValue.get("avgTimeToMergePR"), repoStat.getAvgTimeToMergePR(), true));
+            repoStat.setAvgCommitPerDeveloper(normalizeValue(minMaxValue.get("avgCommitsPerDeveloper"), repoStat.getAvgCommitPerDeveloper(), false));
             float repoHealth = repoStat.getAvgCommitsPerDay() + repoStat.getAvgTimeIssueRemainOpened() + repoStat.getAvgTimeToMergePR() + repoStat.getAvgCommitPerDeveloper();
             repoStat.setHealth(repoHealth);
+
+            // Update current min/max health values
+            updateMinMaxValue(minMaxHealthValue, repoHealth);
+        }
+
+        // Normalize the health
+        for (RepoStat repoStat: listOfRepoStat) {
+            repoStat.setHealth(normalizeValue(minMaxHealthValue, repoStat.getHealth(), false));
         }
 
         // sort the list
         listOfRepoStat.sort(Comparator.comparing(RepoStat::getHealth).reversed());
 
-        // Write the result to health_score
+        // Write the first 1000 repos to health_score
+        int index = 0;
         for (RepoStat repoStat: listOfRepoStat) {
+            if (index > 999) {
+                break;
+            }
             try {
                 writeCSVFile(repoStat);
+                index++;
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Cannot write to csv file");
                 e.printStackTrace();
