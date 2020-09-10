@@ -1,9 +1,9 @@
-##Dependencies
+## Dependencies
 1. Java 11
 2. jackson-core/jackson-annotations/jackson-databind (2.11.2)
 3. common-csv (1.8)
 4. common-io (2.5)
-##Set Up & Run
+## Set Up & Run
 1. run `mvn clean package`
 2. run `cd target`
 3. run `java -jar ai.quod.challenge.HealthScoreCalculator-1.0-SNAPSHOT-jar-with-dependencies.jar [startTime] [endTime]`
@@ -14,17 +14,17 @@ Since I deleted the file after extract information, I can save a lot of storage.
 That helps me to do the metric calculation faster since I don't have to read the file whenever I want to do the calculation. However, there is a drawback with this approach,
 if there are too many event objects to be stored, the program might crash. Nevertheless, we have to compromise between speed and space.
  
-##Future Improvement
-####***Improvement for readability and maintainability?***
+## Future Improvement
+#### ***Improvement for readability and maintainability?***
 - Write function definition (input, output), and use cases for each function<br>
-####***Improve your code for performance?***
+#### ***Improve your code for performance?***
 - Research and apply some data processing techniques to improve the performance
 (Honestly, at the moment, I don't know exactly how to do it)
 - Read the java documents to understand how its data structures (List, Map, etc) are implemented
 to use them in the right context
 - There is no mechanism to preprocess the error json format. So far, if the json cannot be mapped to the
 Event Object, They would be written to the *error_file.txt*
-####frameworks/libraries
+#### ***Frameworks/libraries***
 - Libraries: Jackson and Apache common <br>
 They help to facilitate the coding process. For example, there are many useful common utility functions from apache common 
 such as read/write json file.
