@@ -1,4 +1,4 @@
-package Models;
+package ai.quod.challenge.Models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;

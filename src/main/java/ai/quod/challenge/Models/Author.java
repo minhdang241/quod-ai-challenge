@@ -1,5 +1,8 @@
-package Models;
+package ai.quod.challenge.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Author {
     public String email;
 

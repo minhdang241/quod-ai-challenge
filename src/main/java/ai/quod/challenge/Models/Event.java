@@ -1,6 +1,4 @@
-package Models;
-import Models.Payload;
-import Models.Repo;
+package ai.quod.challenge.Models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
